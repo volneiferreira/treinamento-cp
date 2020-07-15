@@ -3,8 +3,8 @@
  * @NScriptType ClientScript
  * @NModuleScope SameAccount
  */
-define(['N/ui/dialog', '../third/vanilla-masker.min.js', 'N/currentRecord'],
-  function (dialog, VMasker, currentRecord) {
+define(['N/ui/dialog', '../third/vanilla-masker.min.js', 'N/currentRecord', 'N/ui/message', 'N/https', 'N/url'],
+  function (dialog, VMasker, currentRecord, message, https, url) {
     /**
      * Function to be executed after page is initialized.
      *
@@ -189,6 +189,54 @@ define(['N/ui/dialog', '../third/vanilla-masker.min.js', 'N/currentRecord'],
         return false;
       }
 
+      var objRecord = record.load({
+        type: record.Type.SALES_ORDER,
+        id: 157,
+        isDynamic: true,
+      });
+
+      objRecord.save();
+
+      var suiteletUrl = url.resolveScript({
+        scriptId: 'customscript_suiteletcp',
+        deploymentId: 'customdeploy_suiteletcp',
+        params: {
+          invoiceId: '999'
+        }
+      })
+
+      // Sincrona
+      const res = https.get({
+        url: suiteletUrl
+      })
+
+      const invoiceInfo = JSON.parse(res.body)
+
+      invoiceInfo.id
+      invoiceInfo.entity
+      invoiceInfo.date
+
+      if (invoice.id) {
+        alert('tem invoice ID')
+        return false
+      }
+
+      // Assincrona
+      https.get.promise({
+        url: suiteletUrl
+      })
+        .then(function (res) {
+          const invoiceInfo = JSON.parse(res.body)
+
+          invoiceInfo.id
+          invoiceInfo.entity
+          invoiceInfo.date
+
+        })
+        .catch(function () {
+
+        })
+
       return true;
     }
 
@@ -199,6 +247,15 @@ define(['N/ui/dialog', '../third/vanilla-masker.min.js', 'N/currentRecord'],
         title: 'I am an Alert',
         message: 'Função execute.' + employee.getValue({ fieldId: 'firstname' })
       })
+    }
+
+    function print () {
+      message.create({
+        title: "My Title",
+        message: "My Message",
+        type: message.Type.CONFIRMATION
+      })
+        .show()
     }
 
     return {
@@ -212,6 +269,7 @@ define(['N/ui/dialog', '../third/vanilla-masker.min.js', 'N/currentRecord'],
       // validateInsert: validateInsert,
       // validateDelete: validateDelete,
       saveRecord: saveRecord,
-      myExecute: myExecute
+      myExecute: myExecute,
+      print: print
     }
   })
